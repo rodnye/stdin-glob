@@ -10,6 +10,7 @@ interface Options {
   absolute?: boolean;
   copy?: boolean;
   maxLines?: number;
+  lineNumbers?: boolean; // Nueva opción
 }
 
 const program = new Command();
@@ -19,10 +20,11 @@ program
   .description('Expand glob patterns and output file contents and paths')
   .version(version)
   .option('--no-content', 'Do not show file contents, only list matching paths')
-  .option('--absolute', 'Show the absolute path for entries')
+  .option('--absolute', 'Show the absolute path for entries', false)
   .option(
     '-c, --copy',
     'Copy the output to clipboard instead of printing to console',
+    false,
   )
   .option(
     '-m, --max-lines <int>',
@@ -31,6 +33,11 @@ program
       if (isNaN(parseInt(value))) throw new Error('Lines must be a number');
       return parseInt(value);
     },
+  )
+  .option(
+    '-n, --line-numbers',
+    'Show line numbers next to each line, like in IDE sidebars',
+    false,
   )
   .argument('[patterns...]', 'Glob patterns to match files')
   .action(async (patterns: string[], options: Options) => {
@@ -57,6 +64,7 @@ program
         const fileOutput = await getFileContent(
           file,
           options.maxLines ?? undefined,
+          options.lineNumbers ?? false,
         );
         output += fileOutput;
       } else {
@@ -89,20 +97,46 @@ const findMaxConsecutiveBackticks = (str: string): number => {
 };
 
 /**
+ * Add line numbers to content
+ */
+const addLineNumbers = (content: string, startLine: number = 1): string => {
+  const lines = content.split('\n');
+
+  // calculate width of bar
+  const paddingWidth = (startLine + lines.length - 1).toString().length;
+
+  return lines
+    .map((line, index) => {
+      const lineNumber = startLine + index;
+      const paddedNumber = lineNumber.toString().padStart(paddingWidth, ' ');
+      return `${paddedNumber} | ${line}`;
+    })
+    .join('\n');
+};
+
+/**
  * Get file content with markdown format
  * @param filePath - The path to the file
  * @param maxLines - The number of lines to show. If you not provide a number of lines it will show the full file content.
+ * @param showLineNumbers - Whether to show line numbers
  * @returns The file content with markdown format
  */
 const getFileContent = async (
   filePath: string,
   maxLines?: number,
+  showLineNumbers?: boolean,
 ): Promise<string> => {
   try {
     const content = await readFile(filePath, 'utf-8');
-    const contentToShow = maxLines
-      ? content.split('\n').slice(0, maxLines).join('\n')
-      : content;
+    const lines = content.split('\n');
+
+    // maxLines if exists
+    const linesToShow = maxLines ? lines.slice(0, maxLines) : lines;
+    let contentToShow = linesToShow.join('\n');
+
+    if (showLineNumbers)
+      contentToShow = addLineNumbers(linesToShow.join('\n'), 1);
+
     const extension = path.extname(filePath).replace('.', '');
     const maxBackticks = findMaxConsecutiveBackticks(content);
     const wrapper = '`'.repeat(Math.max(3, maxBackticks + 1));
