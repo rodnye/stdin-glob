@@ -3,10 +3,12 @@ import { version } from '../package.json';
 import { readFile } from 'fs/promises';
 import glob from 'fast-glob';
 import path from 'path';
+import clipboard from 'clipboardy';
 
 interface Options {
   content?: boolean;
   absolute?: boolean;
+  copy?: boolean;
 }
 
 const program = new Command();
@@ -17,6 +19,10 @@ program
   .version(version)
   .option('--no-content', 'Do not show file contents, only list matching paths')
   .option('--absolute', 'Show the absolute path for entries')
+  .option(
+    '-c, --copy',
+    'Copy the output to clipboard instead of printing to console',
+  )
   .argument('[patterns...]', 'Glob patterns to match files')
   .action(async (patterns: string[], options: Options) => {
     if (patterns.length === 0) {
@@ -35,27 +41,50 @@ program
       process.exit(1);
     }
 
+    let output = '';
+
     for (const file of files) {
-      if (options.content) await printFileWithFormat(file);
-      else console.log(file);
+      if (options.content) {
+        const fileOutput = await getFileContent(file);
+        output += fileOutput;
+      } else {
+        output += file + '\n';
+      }
+    }
+
+    if (options.copy) {
+      try {
+        await clipboard.write(output.trim());
+        console.log('-> Output copied to clipboard successfully!');
+      } catch (error) {
+        console.error('-X Error copying to clipboard:', error);
+        process.exit(1);
+      }
+    } else {
+      console.log(output.trim());
     }
   });
 
 program.parse(process.argv);
 
 /**
- * Print files with format markdown
+ * Get file content with markdown format
  */
-const printFileWithFormat = async (filePath: string) => {
+const getFileContent = async (filePath: string): Promise<string> => {
   try {
     const content = await readFile(filePath, 'utf-8');
-    console.log('```' + path.extname(filePath).replace('.', ''));
-    console.log(`// ${filePath}`);
-    console.log();
-    console.log(content);
-    console.log('```');
-    console.log();
+    const extension = path.extname(filePath).replace('.', '');
+    return (
+      '```' +
+      extension +
+      '\n' +
+      `// ${filePath}\n\n` +
+      content +
+      '\n' +
+      '```\n\n'
+    );
   } catch (e) {
     console.error(`Error reading file ${filePath}:`, e);
+    return '';
   }
 };
