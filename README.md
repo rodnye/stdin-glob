@@ -25,7 +25,9 @@ This pipes all relevant TypeScript/TSX files directly into my clipboard, ready t
 
 - Expand glob patterns to find matching files
 - Output file contents with syntax highlighting markers
-- Copy output directly to clipboard with `--copy` flag
+- **Limit output to a specific number of lines per file** with `--max-lines`
+- **Show line numbers** with `--line-numbers` for better code reference
+- **Auto-copy output** directly to clipboard with `--copy` flag
 - Support for absolute or relative paths
 - Option to show only file paths without content
 - Written in TypeScript
@@ -44,13 +46,15 @@ stdin-glob [options] [patterns...]
 
 ### Options
 
-| Option          | Description                                                 |
-| --------------- | ----------------------------------------------------------- |
-| `--no-content`  | Do not show file contents, only list matching paths         |
-| `--absolute`    | Show absolute paths for entries                             |
-| `-c, --copy`    | Copy the output to clipboard instead of printing to console |
-| `-V, --version` | Output the version number                                   |
-| `-h, --help`    | Display help information                                    |
+| Option                | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| `--no-content`        | Do not show file contents, only list matching paths                   |
+| `--absolute`          | Show absolute paths for entries                                       |
+| `-c, --copy`          | Copy the output to clipboard instead of printing to console           |
+| `-m, --max-lines <n>` | Show only the first N lines of each file (shows full file if omitted) |
+| `-n, --line-numbers`  | Display line numbers next to each line, like in IDE sidebars          |
+| `-V, --version`       | Output the version number                                             |
+| `-h, --help`          | Display help information                                              |
 
 ### Arguments
 
@@ -89,6 +93,75 @@ console.log('Hello, world!');
 function add(a, b) {
   return a + b;
 }
+```
+````
+
+### Limit lines per file
+
+Show only the first 10 lines of each TypeScript file - perfect for quick overviews:
+
+```bash
+stdin-glob "src/**/*.ts" --max-lines 10
+```
+
+Output:
+
+````
+```ts
+// src/index.ts
+
+import { Command } from 'commander';
+import { version } from '../package.json';
+import { readFile } from 'fs/promises';
+import glob from 'fast-glob';
+import path from 'path';
+import clipboard from 'clipboardy';
+// ... (23 more lines truncated)
+```
+````
+
+### Show line numbers
+
+Display line numbers alongside the code, just like in your editor:
+
+```bash
+stdin-glob "src/**/*.js" --line-numbers
+```
+
+Output:
+
+````
+```js
+// src/index.js
+
+ 1 | import { Command } from 'commander';
+ 2 | import { version } from '../package.json';
+ 3 | import { readFile } from 'fs/promises';
+ 4 | import glob from 'fast-glob';
+ 5 | import path from 'path';
+```
+````
+
+### Combine with line limits
+
+Get a preview with line numbers for better context:
+
+```bash
+stdin-glob "src/**/*.ts" --max-lines 5 --line-numbers
+```
+
+Output:
+
+````
+```ts
+// src/index.ts
+
+ 1 | import { Command } from 'commander';
+ 2 | import { version } from '../package.json';
+ 3 | import { readFile } from 'fs/promises';
+ 4 | import glob from 'fast-glob';
+ 5 | import path from 'path';
+// ... (23 more lines truncated)
 ```
 ````
 
