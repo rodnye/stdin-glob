@@ -68,20 +68,33 @@ program
 program.parse(process.argv);
 
 /**
+ * Find the maximum number of consecutive backticks in a string
+ */
+const findMaxConsecutiveBackticks = (str: string): number => {
+  const matches = str.match(/`+/g);
+  if (!matches) return 0;
+  return Math.max(...matches.map((m) => m.length));
+};
+
+/**
  * Get file content with markdown format
  */
 const getFileContent = async (filePath: string): Promise<string> => {
   try {
     const content = await readFile(filePath, 'utf-8');
     const extension = path.extname(filePath).replace('.', '');
+    const maxBackticks = findMaxConsecutiveBackticks(content);
+    const wrapper = '`'.repeat(Math.max(3, maxBackticks + 1));
+
     return (
-      '```' +
+      wrapper +
       extension +
       '\n' +
       `// ${filePath}\n\n` +
       content +
       '\n' +
-      '```\n\n'
+      wrapper +
+      '\n\n'
     );
   } catch (e) {
     console.error(`Error reading file ${filePath}:`, e);
