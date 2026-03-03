@@ -1,0 +1,35 @@
+{
+  "name": "stdin-glob",
+  "version": "1.0.0",
+  "description": "Expand glob patterns and output file contents, with support for reading patterns from stdin",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "stdin-glob": "./dist/index.js"
+  },
+  "keywords": [
+    "glob",
+    "stdin",
+    "cli",
+    "typescript",
+    "fast-glob"
+  ],
+  "author": "Rodny Estrada<rrodnyestrada1@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodnye/stdin-glob.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rodnye/stdin-glob/issues"
+  },
+  "homepage": "https://github.com/rodnye/stdin-glob#readme",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "fast-glob": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
+  }
+}
