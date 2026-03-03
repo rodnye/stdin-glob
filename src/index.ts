@@ -1,4 +1,4 @@
-import { Argument, Command } from 'commander';
+import { Command } from 'commander';
 import { version } from '../package.json';
 import { readFile } from 'fs/promises';
 import glob from 'fast-glob';
@@ -9,8 +9,7 @@ interface Options {
   content?: boolean;
   absolute?: boolean;
   copy?: boolean;
-  partial?: boolean;
-  lines?: number;
+  maxLines?: number;
 }
 
 const program = new Command();
@@ -26,58 +25,57 @@ program
     'Copy the output to clipboard instead of printing to console',
   )
   .option(
-    '-l, --lines',
-    'Show the number of lines in the file. If you not provide a number of lines it will show the full file content.',
+    '-m, --max-lines <int>',
+    'Show a limited number of lines in the file. If you not provide a number of lines it will show the full file content.',
     (value) => {
-      if (isNaN(parseInt(value))) {
-        throw new Error('Lines must be a number');
-      }
+      if (isNaN(parseInt(value))) throw new Error('Lines must be a number');
       return parseInt(value);
     },
   )
   .argument('[patterns...]', 'Glob patterns to match files')
-  .action(
-    async (patterns: string[], options: Options) => {
-      if (patterns.length === 0) {
-        console.error('Error: No patterns provided.');
-        process.exit(1);
-      }
+  .action(async (patterns: string[], options: Options) => {
+    if (patterns.length === 0) {
+      console.error('Error: No patterns provided.');
+      process.exit(1);
+    }
 
-      //expand glob
-      const files = await glob(patterns, {
-        onlyFiles: true,
-        absolute: options.absolute ?? false,
-      });
+    //expand glob
+    const files = await glob(patterns, {
+      onlyFiles: true,
+      absolute: options.absolute ?? false,
+    });
 
-      if (files.length === 0) {
-        console.error('No files matched the given patterns.');
-        process.exit(1);
-      }
+    if (files.length === 0) {
+      console.error('No files matched the given patterns.');
+      process.exit(1);
+    }
 
-      let output = '';
+    let output = '';
 
-      for (const file of files) {
-        if (options.content) {
-          const fileOutput = await getFileContent(file, options.lines ?? undefined);
-          output += fileOutput;
-        } else {
-          output += file + '\n';
-        }
-      }
-
-      if (options.copy) {
-        try {
-          await clipboard.write(output.trim());
-          console.log('-> Output copied to clipboard successfully!');
-        } catch (error) {
-          console.error('-X Error copying to clipboard:', error);
-          process.exit(1);
-        }
+    for (const file of files) {
+      if (options.content) {
+        const fileOutput = await getFileContent(
+          file,
+          options.maxLines ?? undefined,
+        );
+        output += fileOutput;
       } else {
-        console.log(output.trim());
+        output += file + '\n';
       }
-    },
-  );
+    }
+
+    if (options.copy) {
+      try {
+        await clipboard.write(output.trim());
+        console.log('-> Output copied to clipboard successfully!');
+      } catch (error) {
+        console.error('-X Error copying to clipboard:', error);
+        process.exit(1);
+      }
+    } else {
+      console.log(output.trim());
+    }
+  });
 
 program.parse(process.argv);
 
@@ -93,16 +91,18 @@ const findMaxConsecutiveBackticks = (str: string): number => {
 /**
  * Get file content with markdown format
  * @param filePath - The path to the file
- * @param lines - The number of lines to show. If you not provide a number of lines it will show the full file content.
+ * @param maxLines - The number of lines to show. If you not provide a number of lines it will show the full file content.
  * @returns The file content with markdown format
  */
 const getFileContent = async (
   filePath: string,
-  lines?: number,
+  maxLines?: number,
 ): Promise<string> => {
   try {
     const content = await readFile(filePath, 'utf-8');
-    const contentToShow = lines ? content.split('\n').slice(0, lines).join('\n') : content;
+    const contentToShow = maxLines
+      ? content.split('\n').slice(0, maxLines).join('\n')
+      : content;
     const extension = path.extname(filePath).replace('.', '');
     const maxBackticks = findMaxConsecutiveBackticks(content);
     const wrapper = '`'.repeat(Math.max(3, maxBackticks + 1));
