@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/rodnye/stdin-glob#readme",
   "dependencies": {
+    "clipboardy": "^5.3.1",
     "commander": "^11.1.0",
     "fast-glob": "^3.3.3"
   },
