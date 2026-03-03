@@ -1,9 +1,9 @@
-import { Argument, Command } from "commander";
-import { version } from "../package.json";
-import { readFile } from "fs/promises";
-import glob from "fast-glob";
-import path from "path";
-import clipboard from "clipboardy";
+import { Argument, Command } from 'commander';
+import { version } from '../package.json';
+import { readFile } from 'fs/promises';
+import glob from 'fast-glob';
+import path from 'path';
+import clipboard from 'clipboardy';
 
 interface Options {
   content?: boolean;
@@ -16,30 +16,30 @@ interface Options {
 const program = new Command();
 
 program
-  .name("stdin-glob")
-  .description("Expand glob patterns and output file contents and paths")
+  .name('stdin-glob')
+  .description('Expand glob patterns and output file contents and paths')
   .version(version)
-  .option("--no-content", "Do not show file contents, only list matching paths")
-  .option("--absolute", "Show the absolute path for entries")
+  .option('--no-content', 'Do not show file contents, only list matching paths')
+  .option('--absolute', 'Show the absolute path for entries')
   .option(
-    "-c, --copy",
-    "Copy the output to clipboard instead of printing to console",
+    '-c, --copy',
+    'Copy the output to clipboard instead of printing to console',
   )
   .option(
-    "-l, --lines",
-    "Show the number of lines in the file. If you not provide a number of lines it will show the full file content.",
+    '-l, --lines',
+    'Show the number of lines in the file. If you not provide a number of lines it will show the full file content.',
     (value) => {
       if (isNaN(parseInt(value))) {
-        throw new Error("Lines must be a number");
+        throw new Error('Lines must be a number');
       }
       return parseInt(value);
     },
   )
-  .argument("[patterns...]", "Glob patterns to match files")
+  .argument('[patterns...]', 'Glob patterns to match files')
   .action(
     async (patterns: string[], options: Options) => {
       if (patterns.length === 0) {
-        console.error("Error: No patterns provided.");
+        console.error('Error: No patterns provided.');
         process.exit(1);
       }
 
@@ -50,27 +50,27 @@ program
       });
 
       if (files.length === 0) {
-        console.error("No files matched the given patterns.");
+        console.error('No files matched the given patterns.');
         process.exit(1);
       }
 
-      let output = "";
+      let output = '';
 
       for (const file of files) {
         if (options.content) {
           const fileOutput = await getFileContent(file, options.lines ?? undefined);
           output += fileOutput;
         } else {
-          output += file + "\n";
+          output += file + '\n';
         }
       }
 
       if (options.copy) {
         try {
           await clipboard.write(output.trim());
-          console.log("-> Output copied to clipboard successfully!");
+          console.log('-> Output copied to clipboard successfully!');
         } catch (error) {
-          console.error("-X Error copying to clipboard:", error);
+          console.error('-X Error copying to clipboard:', error);
           process.exit(1);
         }
       } else {
@@ -101,24 +101,24 @@ const getFileContent = async (
   lines?: number,
 ): Promise<string> => {
   try {
-    const content = await readFile(filePath, "utf-8");
-    const contentToShow = lines ? content.split("\n").slice(0, lines).join("\n") : content;
-    const extension = path.extname(filePath).replace(".", "");
+    const content = await readFile(filePath, 'utf-8');
+    const contentToShow = lines ? content.split('\n').slice(0, lines).join('\n') : content;
+    const extension = path.extname(filePath).replace('.', '');
     const maxBackticks = findMaxConsecutiveBackticks(content);
-    const wrapper = "`".repeat(Math.max(3, maxBackticks + 1));
+    const wrapper = '`'.repeat(Math.max(3, maxBackticks + 1));
 
     return (
       wrapper +
       extension +
-      "\n" +
+      '\n' +
       `// ${filePath}\n\n` +
       contentToShow +
-      "\n" +
+      '\n' +
       wrapper +
-      "\n\n"
+      '\n\n'
     );
   } catch (e) {
     console.error(`Error reading file ${filePath}:`, e);
-    return "";
+    return '';
   }
 };
