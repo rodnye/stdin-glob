@@ -1,6 +1,6 @@
 {
   "name": "stdin-glob",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Expand glob patterns and output file contents.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
