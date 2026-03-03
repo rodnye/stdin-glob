@@ -107,12 +107,18 @@ const getFileContent = async (
     const maxBackticks = findMaxConsecutiveBackticks(content);
     const wrapper = '`'.repeat(Math.max(3, maxBackticks + 1));
 
+    const truncation =
+      maxLines && lines.length > maxLines
+        ? `\n// ... (${lines.length - maxLines} more lines truncated)`
+        : '';
+
     return (
       wrapper +
       extension +
       '\n' +
       `// ${filePath}\n\n` +
       contentToShow +
+      truncation +
       '\n' +
       wrapper +
       '\n\n'
