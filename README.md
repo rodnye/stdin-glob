@@ -25,6 +25,7 @@ This pipes all relevant TypeScript/TSX files directly into my clipboard, ready t
 
 - Expand glob patterns to find matching files
 - Output file contents with syntax highlighting markers
+- Copy output directly to clipboard with `--copy` flag
 - Support for absolute or relative paths
 - Option to show only file paths without content
 - Written in TypeScript
@@ -43,12 +44,13 @@ stdin-glob [options] [patterns...]
 
 ### Options
 
-| Option          | Description                                         |
-| --------------- | --------------------------------------------------- |
-| `--no-content`  | Do not show file contents, only list matching paths |
-| `--absolute`    | Show absolute paths for entries                     |
-| `-V, --version` | Output the version number                           |
-| `-h, --help`    | Display help information                            |
+| Option          | Description                                                 |
+| --------------- | ----------------------------------------------------------- |
+| `--no-content`  | Do not show file contents, only list matching paths         |
+| `--absolute`    | Show absolute paths for entries                             |
+| `-c, --copy`    | Copy the output to clipboard instead of printing to console |
+| `-V, --version` | Output the version number                                   |
+| `-h, --help`    | Display help information                                    |
 
 ### Arguments
 
@@ -89,6 +91,22 @@ function add(a, b) {
 }
 ```
 ````
+
+### Copy to clipboard
+
+Copy all TypeScript file contents directly to clipboard:
+
+```bash
+stdin-glob "src/**/*.ts" --copy
+```
+
+This will copy the formatted output to your clipboard without printing to console. You'll see a confirmation message:
+
+```
+-> Output copied to clipboard successfully!
+```
+
+Now you can paste (Ctrl+V or Cmd+V) anywhere - perfect for sharing code in pull requests, documentation, or with LLMs.
 
 ### Only list files
 
@@ -136,4 +154,15 @@ Use with grep to search for specific content:
 
 ```bash
 stdin-glob "src/**/*.ts" | grep "function"
+```
+
+Or combine with other clipboard tools for maximum flexibility:
+
+```bash
+# Copy without the confirmation message
+stdin-glob "src/**/*.ts" --no-content | pbcopy
+
+# Preview first, then copy if it looks good
+stdin-glob "src/**/*.ts" --content
+stdin-glob "src/**/*.ts" --copy
 ```
