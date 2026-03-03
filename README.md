@@ -1,5 +1,3 @@
-Aquí tienes el README actualizado con la nueva sección "Why?":
-
 # stdin-glob
 
 [![npm version](https://img.shields.io/npm/v/stdin-glob.svg)](https://www.npmjs.com/package/stdin-glob)
