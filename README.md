@@ -1,3 +1,21 @@
+# ⚠️ DEPRECATION WARNING
+
+**`stdin-glob` is deprecated.**
+
+Please update your workflows to use [`codepicker-tool`](https://github.com/rodnye/codepicker) instead. All existing functionality has been migrated and improved in `codepicker`.
+
+You can install the replacement via:
+
+```bash
+npm install -g codepicker-tool
+# or
+pnpm install -g codepicker-tool
+```
+
+# Original README for stdin-glob
+
+*(Below is the original README content)*
+
 # stdin-glob
 
 [![npm version](https://img.shields.io/npm/v/stdin-glob.svg)](https://www.npmjs.com/package/stdin-glob)
